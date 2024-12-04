@@ -3,13 +3,13 @@ import sinon from 'sinon';
 import { configureStore } from '@reduxjs/toolkit';
 
 import authentication, {
-  getAccount,
-  authenticate,
-  logoutServer,
-  clearAuthentication,
   authError,
+  authenticate,
   clearAuth,
+  clearAuthentication,
+  getAccount,
   initialState,
+  logoutServer,
 } from 'app/shared/reducers/authentication';
 
 describe('Authentication reducer tests', () => {

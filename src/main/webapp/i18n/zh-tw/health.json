@@ -11,6 +11,7 @@
       "error": "錯誤"
     },
     "indicator": {
+      "binders": "Message Broker",
       "diskSpace": "硬碟空間",
       "mail": "電子郵件",
       "livenessState": "Liveness state",
