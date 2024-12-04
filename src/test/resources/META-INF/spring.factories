@@ -1,0 +1,2 @@
+org.springframework.test.context.ContextCustomizerFactory = org.wemeet.portal.\
+    config.TestContainersSpringContextCustomizerFactory
