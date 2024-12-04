@@ -33,7 +33,9 @@ spring:
       enabled: false
   data:
     mongodb:
-      uri: mongodb+srv://sendon1982:hZWO5aipsjtoNjLr@wemeet-cluster.xiyvl.mongodb.net/wemeetadmin
+      uri: mongodb+srv://sendon1982:hZWO5aipsjtoNjLr@wemeet-cluster.xiyvl.mongodb.net/wemeetadmin?retryWrites=true&w=majority
+      auto-index-creation: true
+
   mail:
     host: localhost
     port: 25
