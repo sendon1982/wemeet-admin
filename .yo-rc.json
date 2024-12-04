@@ -20,7 +20,7 @@
     "feignClient": null,
     "jhipsterVersion": "8.7.3",
     "languages": ["en", "zh-cn"],
-    "lastLiquibaseTimestamp": 1733306583000,
+    "lastLiquibaseTimestamp": 1733309780000,
     "messageBroker": false,
     "microfrontend": null,
     "microfrontends": [],
