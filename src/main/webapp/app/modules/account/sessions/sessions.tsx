@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Alert, Table, Button } from 'reactstrap';
+import { Alert, Button, Table } from 'reactstrap';
 import { Translate } from 'react-jhipster';
 
 import { getSession } from 'app/shared/reducers/authentication';
