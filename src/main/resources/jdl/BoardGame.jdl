@@ -1,0 +1,39 @@
+entity BoardGame {
+  englishName String required, // Name of the board game
+  chineseName String required, // Name of the board game
+  description String, // Brief description
+  yearPublished Integer, // Year the game was first published
+  minPlayers Integer, // Minimum number of players
+  maxPlayers Integer, // Maximum number of players
+  playTimeMin Integer, // Minimum playtime (in minutes)
+  playTimeMax Integer, // Maximum playtime (in minutes)
+  minAge Integer, // Minimum age recommended
+  suggestedAge Integer, // Community-recommended age
+  mechanics String required, // List of gameplay mechanics (comma-separated)
+  categories String required, // Categories (comma-separated)
+  designers String, // Designers (comma-separated)
+  publishers String, // Publishers (comma-separated)
+  artists String, // Artists (comma-separated)
+  rating Double, // Average community rating
+  ratingVotes Long, // Total number of rating votes
+  complexity Double, // Complexity weight (e.g., 1.0 - 5.0)
+  complexityVotes Long, // Total number of complexity votes
+  officialUrl String, // Official website URL
+  bggUrl String, // BGG page URL
+  thumbnailUrl String, // Thumbnail image URL
+  largeImageUrl String, // Large image URL
+  createdAt ZonedDateTime, // Creation timestamp
+  updatedAt ZonedDateTime // Last update timestamp
+}
+
+entity TagInfo {
+  tag String
+}
+
+relationship OneToMany {
+  BoardGame{tags} to TagInfo
+}
+
+dto BoardGame with mapstruct
+service BoardGame with serviceImpl
+paginate BoardGame with pagination
