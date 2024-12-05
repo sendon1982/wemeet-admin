@@ -91,7 +91,7 @@ For further instructions on how to develop with JHipster, have a look at [Using 
 To build the final jar and optimize the wemeetadmin application for production, run:
 
 ```
-./mvnw -Pprod clean verify
+./mvnw clean verify -DskipTests -Pprod
 ```
 
 This will concatenate and minify the client CSS and JavaScript files. It will also modify `index.html` so it references these new files.
@@ -110,7 +110,8 @@ Refer to [Using JHipster in production][] for more details.
 To package your application as a war in order to deploy it to an application server, run:
 
 ```
-./mvnw -Pprod,war clean verify
+./mvnw clean verify -DskipTests -Pprod,war
+
 ```
 
 ### JHipster Control Center
