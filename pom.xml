@@ -74,6 +74,8 @@
         <spotless-maven-plugin.version>2.43.0</spotless-maven-plugin.version>
         <spring-cloud-dependencies.version>2023.0.3</spring-cloud-dependencies.version>
         <springdoc-openapi-starter-webmvc-api.version>2.6.0</springdoc-openapi-starter-webmvc-api.version>
+
+        <gcp-ecr>australia-southeast1-docker.pkg.dev/gps-root-main/wemeet-ecr</gcp-ecr>
     </properties>
 
     <dependencyManagement>
@@ -284,6 +286,7 @@
                 </excludes>
             </resource>
         </resources>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -341,7 +344,29 @@
                 <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
             </plugin>
+
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>dockerfile-maven-plugin</artifactId>
+                <version>1.4.13</version>
+                <configuration>
+                    <repository>${gcp-ecr}/${project.artifactId}</repository>
+                    <tag>${project.version}</tag>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>build-docker-image</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>build</goal>
+                            <goal>push</goal>
+                        </goals>
+                    </execution>
+                </executions>
+              </plugin>
+
         </plugins>
+
         <pluginManagement>
             <plugins>
                 <plugin>
