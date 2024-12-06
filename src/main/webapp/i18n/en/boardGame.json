@@ -1,0 +1,47 @@
+{
+  "wemeetadminApp": {
+    "boardGame": {
+      "home": {
+        "title": "Board Games",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Create a new Board Game",
+        "createOrEditLabel": "Create or edit a Board Game",
+        "notFound": "No Board Games found"
+      },
+      "created": "A new Board Game is created with identifier {{ param }}",
+      "updated": "A Board Game is updated with identifier {{ param }}",
+      "deleted": "A Board Game is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Board Game {{ id }}?"
+      },
+      "detail": {
+        "title": "Board Game"
+      },
+      "id": "ID",
+      "englishName": "English Name",
+      "chineseName": "Chinese Name",
+      "description": "Description",
+      "yearPublished": "Year Published",
+      "minPlayers": "Min Players",
+      "maxPlayers": "Max Players",
+      "playTimeMin": "Play Time Min",
+      "playTimeMax": "Play Time Max",
+      "minAge": "Min Age",
+      "suggestedAge": "Suggested Age",
+      "mechanics": "Mechanics",
+      "categories": "Categories",
+      "publishers": "Publishers",
+      "rating": "Rating",
+      "ratingVotes": "Rating Votes",
+      "complexity": "Complexity",
+      "complexityVotes": "Complexity Votes",
+      "officialUrl": "Official Url",
+      "bggUrl": "Bgg Url",
+      "gstoneUrl": "Gstone Url",
+      "thumbnailUrl": "Thumbnail Url",
+      "largeImageUrl": "Large Image Url",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At"
+    }
+  }
+}

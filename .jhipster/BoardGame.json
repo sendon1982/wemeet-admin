@@ -1,0 +1,114 @@
+{
+  "annotations": {
+    "changelogDate": "20241205120726"
+  },
+  "applications": "*",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "englishName",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "chineseName",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "description",
+      "fieldType": "TextBlob"
+    },
+    {
+      "fieldName": "yearPublished",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "minPlayers",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "maxPlayers",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "playTimeMin",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "playTimeMax",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "minAge",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "suggestedAge",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "mechanics",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "categories",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "publishers",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "rating",
+      "fieldType": "Double"
+    },
+    {
+      "fieldName": "ratingVotes",
+      "fieldType": "Long"
+    },
+    {
+      "fieldName": "complexity",
+      "fieldType": "Double"
+    },
+    {
+      "fieldName": "complexityVotes",
+      "fieldType": "Long"
+    },
+    {
+      "fieldName": "officialUrl",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "bggUrl",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "gstoneUrl",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "thumbnailUrl",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "largeImageUrl",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "createdAt",
+      "fieldType": "ZonedDateTime"
+    },
+    {
+      "fieldName": "updatedAt",
+      "fieldType": "ZonedDateTime"
+    }
+  ],
+  "name": "BoardGame",
+  "pagination": "pagination",
+  "relationships": [],
+  "searchEngine": "no",
+  "service": "serviceImpl"
+}
