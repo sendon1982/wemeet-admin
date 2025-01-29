@@ -1,3 +1,7 @@
+entity TagInfo {
+  tag String
+}
+
 entity BoardGame {
   englishName String required, // Name of the board game
   chineseName String required, // Name of the board game
@@ -26,9 +30,11 @@ entity BoardGame {
   updatedAt ZonedDateTime // Last update timestamp
 }
 
-//entity TagInfo {
-//  tag String
-//}
+relationship ManyToOne {
+  BoardGame{tags} to TagInfo
+}
+
+
 //
 //relationship OneToMany {
 //  BoardGame{tags} to TagInfo

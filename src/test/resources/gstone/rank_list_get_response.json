@@ -1,0 +1,100 @@
+{
+  "status": 200,
+  "cache_flag": 0,
+  "reason": "",
+  "data": {
+    "rank_info": {
+      "user_info": {},
+      "share_title": "BGG极客排行榜 TOP10",
+      "played_num": 0,
+      "order_remark": "BGG极客评分从高到低"
+    },
+    "game_list": [
+      {
+        "is_mm": 0,
+        "total_time": 120,
+        "sub_category": [],
+        "pro_category": [],
+        "is_expansion": 0,
+        "mod_type": 1,
+        "is_pg": 0,
+        "box_url": "https://oss.gstonegames.com/static/image/gameimgEh/202107/c_3361549545261_21209040.jpg",
+        "primary_language": "ENG",
+        "id": 4320,
+        "category": [
+          {
+            "id": 288,
+            "value": "德式"
+          }
+        ],
+        "cover_url_s": "https://oss.gstonegames.com/static/image/gameimgZh/202103/c_8137197805161_d17b88b5.jpg?x-oss-process=image/auto-orient,1/resize,m_lfit,w_512/quality,q_100",
+        "if_login_info": {},
+        "average_time_per_player": 40,
+        "theme": [
+          {
+            "id": 394,
+            "value": "经济"
+          },
+          {
+            "id": 409,
+            "value": "产业"
+          },
+          {
+            "id": 445,
+            "value": "交通"
+          },
+          {
+            "id": 406,
+            "value": "历史"
+          },
+          {
+            "id": 462,
+            "value": "英国"
+          }
+        ],
+        "sales_mode_id": 0,
+        "role_sex_info": {
+          "she_num": 0,
+          "it_num": 0,
+          "he_num": 0
+        },
+        "sales_mode": {
+          "id": 0,
+          "value": ""
+        },
+        "status": {
+          "id": 310,
+          "value": "已出版"
+        },
+        "designer": "[\"315\", \"316\", \"183\", \"213\", \"214\", \"1607\"]",
+        "expansion_type": 0,
+        "width_height": 1.0,
+        "is_glight": 0,
+        "order_info": {
+          "change_order": 0,
+          "is_new_add": 0
+        },
+        "cover_url": "https://oss.gstonegames.com/static/image/gameimgZh/202103/c_8137197805161_d17b88b5.jpg",
+        "bayesaverage": 8.40915,
+        "first_picture": {
+          "picture_url": "https://oss.gstonegames.com/static/image/gameimgZh/202103/c_8137197805161_d17b88b5.jpg",
+          "picture_url_s": "https://oss.gstonegames.com/static/image/gameimgZh/202103/c_8137197805161_d17b88b5.jpg?x-oss-process=image/auto-orient,1/resize,m_lfit,w_512/quality,q_100",
+          "width_height": 1.0
+        },
+        "player_num": [0, 1, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "name": "工业革命：伯明翰",
+        "difficulty": 7,
+        "mm_rating_info": {},
+        "game_hotness_value": 1258821.0,
+        "publish_year": 2018,
+        "mode": {
+          "id": 295,
+          "value": "竞争"
+        },
+        "box_url_s": "https://oss.gstonegames.com/static/image/gameimgEh/202107/c_3361549545261_21209040.jpg?x-oss-process=image/auto-orient,1/resize,m_lfit,w_512/quality,q_100",
+        "gstone_rating": 8.79924,
+        "price_info": {}
+      }
+    ]
+  }
+}

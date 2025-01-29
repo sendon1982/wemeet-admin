@@ -96,6 +96,18 @@ mongock:
 spring:
   application:
     name: wemeetadmin
+
+  devtools:
+    restart:
+      enabled: false
+    livereload:
+      enabled: false
+  data:
+    mongodb:
+      # PROD env
+      uri: mongodb+srv://sendon1982:hZWO5aipsjtoNjLr@wemeet-cluster.xiyvl.mongodb.net/wemeetadmin?retryWrites=true&w=majority
+      auto-index-creation: true
+
   docker:
     compose:
       enabled: true

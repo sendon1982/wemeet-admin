@@ -24,8 +24,12 @@
         -->
         <maven.version>3.2.5</maven.version>
         <java.version>17</java.version>
+
         <node.version>v22.11.0</node.version>
         <npm.version>10.9.0</npm.version>
+
+        <lombok.version>1.18.36</lombok.version>
+
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
@@ -204,6 +208,20 @@
             <version>${archunit-junit5.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+        </dependency>
+
+        <!-- Apache HttpClient (for connection pooling) -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.14</version> <!-- Use the appropriate version -->
+        </dependency>
+
         <dependency>
             <!-- Adding the engine dependency to the surefire-plugin unfortunately does not work in the current version. -->
             <!-- https://www.archunit.org/userguide/html/000_Index.html#_junit_5 -->
