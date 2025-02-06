@@ -241,3 +241,29 @@ To configure CI for your project, run the ci-cd sub-generator (`jhipster ci-cd`)
 [Jest]: https://facebook.github.io/jest/
 [Leaflet]: https://leafletjs.com/
 [DefinitelyTyped]: https://definitelytyped.org/
+
+### Update all dependencies
+
+```
+jhipster jdl src/main/resources/jdl/BoardGame.jdl
+```
+
+### Deploy to GCP
+
+# Build and push docker image
+
+`mvn package dockerfile:build dockerfile:push`
+
+# deploy
+
+```
+gcloud run deploy wemeet-admin \
+      --image=australia-southeast1-docker.pkg.dev/gps-root-main/wemeet-ecr/wemeet-admin:0.0.2-SNAPSHOT \
+      --region=australia-southeast1 \
+      --platform=managed \
+      --allow-unauthenticated
+```
+
+# Test
+
+`http://localhost:8080/api/boardgames/games/search?chineseName=%E6%B2%99%E4%B8%98`

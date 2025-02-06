@@ -4,11 +4,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.wemeet.portal</groupId>
-    <artifactId>wemeetadmin</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <artifactId>wemeet-admin</artifactId>
+    <version>0.0.3-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>Wemeetadmin</name>
     <description>Description for Wemeetadmin</description>
+
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -27,8 +28,6 @@
 
         <node.version>v22.11.0</node.version>
         <npm.version>10.9.0</npm.version>
-
-        <lombok.version>1.18.36</lombok.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -181,11 +180,20 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
             <version>${springdoc-openapi-starter-webmvc-api.version}</version>
         </dependency>
+
+      <!-- OpenApi3 -->
+      <dependency>
+        <groupId>io.swagger.core.v3</groupId>
+        <artifactId>swagger-annotations</artifactId>
+        <version>2.2.20</version>
+      </dependency>
+
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-hppc</artifactId>
@@ -212,15 +220,16 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
+            <optional>true</optional>
         </dependency>
 
         <!-- Apache HttpClient (for connection pooling) -->
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.14</version> <!-- Use the appropriate version -->
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+            <version>5.4.1</version>
         </dependency>
+
 
         <dependency>
             <!-- Adding the engine dependency to the surefire-plugin unfortunately does not work in the current version. -->
@@ -383,6 +392,53 @@
                 </executions>
               </plugin>
 
+          <plugin>
+            <groupId>org.openapitools</groupId>
+            <artifactId>openapi-generator-maven-plugin</artifactId>
+            <version>7.3.0</version>
+
+            <executions>
+              <execution>
+                <id>generate-wemeet-games-id</id>
+                <goals>
+                  <goal>generate</goal>
+                </goals>
+                <configuration>
+                  <inputSpec>src/main/resources/openapi3/game-openaip3.yaml</inputSpec>
+                  <!-- Use 'spring' to generate server side code -->
+                  <generatorName>spring</generatorName>
+                  <library>spring-boot</library>
+                  <apiPackage>org.wemeet.portal.gen.service.gstone</apiPackage>
+                  <modelPackage>org.wemeet.portal.gen.service.model</modelPackage>
+                  <generateApis>true</generateApis>
+                  <generateModels>true</generateModels>
+                  <generateApiDocumentation>false</generateApiDocumentation>
+                  <generateModelTests>false</generateModelTests>
+                  <generateApiTests>false</generateApiTests>
+                  <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
+                  <configOptions>
+                    <sourceFolder>src/gen-wemeet-portal/main/java</sourceFolder>
+                    <openApiNullable>false</openApiNullable>
+                    <dateLibrary>java8</dateLibrary>
+                    <interfaceOnly>true</interfaceOnly>
+                    <useTags>true</useTags>
+                    <useSwaggerUI>true</useSwaggerUI>
+                    <useSpringBoot3>true</useSpringBoot3>
+                  </configOptions>
+                  <typeMappings>
+                    <typeMapping>OffsetDate=LocalDate</typeMapping>
+                    <typeMapping>OffsetDateTime=LocalDateTime</typeMapping>
+                  </typeMappings>
+                  <importMappings>
+                    <importMapping>java.time.OffsetDate=java.time.LocalDate</importMapping>
+                    <importMapping>java.time.OffsetDateTime=java.time.LocalDateTime</importMapping>
+                  </importMappings>
+                </configuration>
+              </execution>
+
+            </executions>
+          </plugin>
+
         </plugins>
 
         <pluginManagement>
@@ -444,6 +500,11 @@
                                 <groupId>org.mapstruct</groupId>
                                 <artifactId>mapstruct-processor</artifactId>
                                 <version>${mapstruct.version}</version>
+                            </path>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>${lombok.version}</version>
                             </path>
                         </annotationProcessorPaths>
                     </configuration>
@@ -831,71 +892,7 @@
                 </dependency>
             </dependencies>
         </profile>
-        <profile>
-            <!-- This is automatically activated when working in Eclipse -->
-            <id>eclipse</id>
-            <activation>
-                <property>
-                    <name>m2e.version</name>
-                </property>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <!-- The following dependency is added due to issue #9175-->
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-undertow</artifactId>
-                </dependency>
-            </dependencies>
-            <build>
-                <pluginManagement>
-                    <plugins>
-                        <!--
-                            This plugin's configuration is used to store Eclipse m2e settings only.
-                            It has no influence on the Maven build itself.
-                            Remove when the m2e plugin can correctly bind to Maven lifecycle
-                        -->
-                        <plugin>
-                            <groupId>org.eclipse.m2e</groupId>
-                            <artifactId>lifecycle-mapping</artifactId>
-                            <version>${lifecycle-mapping.version}</version>
-                            <configuration>
-                                <lifecycleMappingMetadata>
-                                    <pluginExecutions>
-                                        <pluginExecution>
-                                            <pluginExecutionFilter>
-                                                <groupId>org.jacoco</groupId>
-                                                <artifactId>jacoco-maven-plugin</artifactId>
-                                                <versionRange>${jacoco-maven-plugin.version}</versionRange>
-                                                <goals>
-                                                    <goal>prepare-agent</goal>
-                                                </goals>
-                                            </pluginExecutionFilter>
-                                            <action>
-                                                <ignore/>
-                                            </action>
-                                        </pluginExecution>
-                                        <pluginExecution>
-                                            <pluginExecutionFilter>
-                                                <groupId>com.github.eirslett</groupId>
-                                                <artifactId>frontend-maven-plugin</artifactId>
-                                                <versionRange>${frontend-maven-plugin.version}</versionRange>
-                                                <goals>
-                                                    <goal>install-node-and-npm</goal>
-                                                    <goal>npm</goal>
-                                                </goals>
-                                            </pluginExecutionFilter>
-                                            <action>
-                                                <ignore/>
-                                            </action>
-                                        </pluginExecution>
-                                    </pluginExecutions>
-                                </lifecycleMappingMetadata>
-                            </configuration>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
-            </build>
-        </profile>
+
         <profile>
             <!--
                 Profile for applying IDE-specific configuration.
@@ -1110,4 +1107,5 @@
             </build>
         </profile>
     </profiles>
+
 </project>

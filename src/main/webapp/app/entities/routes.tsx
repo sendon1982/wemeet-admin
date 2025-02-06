@@ -4,6 +4,7 @@ import ErrorBoundaryRoutes from 'app/shared/error/error-boundary-routes';
 
 import { Route } from 'react-router-dom';
 import BoardGame from './board-game';
+import TagInfo from './tag-info';
 /* jhipster-needle-add-route-import - JHipster will add routes here */
 
 export default () => {
@@ -12,6 +13,7 @@ export default () => {
       <ErrorBoundaryRoutes>
         {/* prettier-ignore */}
         <Route path="board-game/*" element={<BoardGame />} />
+        <Route path="tag-info/*" element={<TagInfo />} />
         {/* jhipster-needle-add-route-path - JHipster will add routes here */}
       </ErrorBoundaryRoutes>
     </div>

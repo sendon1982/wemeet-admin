@@ -1,15 +1,22 @@
 package org.wemeet.portal.config;
 
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
+import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
+import org.wemeet.portal.service.DateToZonedDateTimeConverter;
 
 @Configuration
 public class AppConfig {
@@ -17,28 +24,26 @@ public class AppConfig {
     // Configuration parameters
     private static final int MAX_TOTAL_CONNECTIONS = 512;
     private static final int MAX_CONNECTIONS_PER_ROUTE = 64;
-    private static final int TIMEOUT = 6000 * 100; // 600 seconds
+    private static final int TIMEOUT = 600; // 600 seconds
 
     @Bean
     public RestTemplate restTemplate() {
-        // Setup connection manager
-        PoolingHttpClientConnectionManager poolingHttpClientConnectionManager = new PoolingHttpClientConnectionManager();
+        final RestTemplate restTemplate = new RestTemplate();
 
-        // Configure the max connections per route
-        poolingHttpClientConnectionManager.setDefaultMaxPerRoute(MAX_CONNECTIONS_PER_ROUTE);
-        // Set the max total connections
-        poolingHttpClientConnectionManager.setMaxTotal(MAX_TOTAL_CONNECTIONS);
+        List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
+        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+        converter.setSupportedMediaTypes(Collections.singletonList(MediaType.TEXT_PLAIN));
+        messageConverters.add(converter);
+        restTemplate.setMessageConverters(messageConverters);
 
-        // Configure timeouts
-        RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(TIMEOUT).setSocketTimeout(TIMEOUT).build();
+        return restTemplate;
+    }
 
-        // Create the HttpClient with the connection manager and timeouts
-        CloseableHttpClient httpClient = HttpClients.custom()
-            .setDefaultRequestConfig(requestConfig)
-            .setConnectionManager(poolingHttpClientConnectionManager)
-            .build();
+    @Bean
+    public MongoCustomConversions customConversions() {
+        List<org.springframework.core.convert.converter.Converter<?, ?>> converters = new ArrayList<>();
+        converters.add(new DateToZonedDateTimeConverter());
 
-        // Return the RestTemplate
-        return new RestTemplate(new HttpComponentsClientHttpRequestFactory(httpClient));
+        return new MongoCustomConversions(converters);
     }
 }
