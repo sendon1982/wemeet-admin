@@ -5,7 +5,7 @@ FROM openjdk:17-jdk-slim
 WORKDIR /app
 
 # Copy the JAR file to the container
-COPY target/wemeet-admin-0.0.1-SNAPSHOT.jar /app/app.jar
+COPY target/wemeet-admin-*-SNAPSHOT.jar /app/app.jar
 
 # Expose the port that the Spring Boot app listens on
 EXPOSE 8080

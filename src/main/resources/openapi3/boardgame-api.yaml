@@ -6,11 +6,12 @@ info:
 servers:
   - url: http://localhost:8082/api/v1
 tags:
-  - Board Game
+  - name: Board Game
 paths:
   /games/search:
     get:
       summary: Search for board games
+      operationId: searchBoardGames
       tags:
         - Board Game
       parameters:

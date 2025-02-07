@@ -5,7 +5,7 @@
 
     <groupId>org.wemeet.portal</groupId>
     <artifactId>wemeet-admin</artifactId>
-    <version>0.0.3-SNAPSHOT</version>
+    <version>0.0.6-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>Wemeetadmin</name>
     <description>Description for Wemeetadmin</description>
@@ -404,7 +404,7 @@
                   <goal>generate</goal>
                 </goals>
                 <configuration>
-                  <inputSpec>src/main/resources/openapi3/game-openaip3.yaml</inputSpec>
+                  <inputSpec>src/main/resources/openapi3/boardgame-api.yaml</inputSpec>
                   <!-- Use 'spring' to generate server side code -->
                   <generatorName>spring</generatorName>
                   <library>spring-boot</library>

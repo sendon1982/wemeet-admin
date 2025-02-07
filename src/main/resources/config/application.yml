@@ -105,7 +105,7 @@ spring:
   data:
     mongodb:
       # PROD env
-      uri: mongodb+srv://sendon1982:hZWO5aipsjtoNjLr@wemeet-cluster.xiyvl.mongodb.net/wemeetadmin?retryWrites=true&w=majority
+      uri: mongodb+srv://sendon1982:${MONGO_PASSWORD}@wemeet-cluster.xiyvl.mongodb.net/wemeetadmin?retryWrites=true&w=majority
       auto-index-creation: true
 
   docker:
