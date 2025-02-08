@@ -5,7 +5,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -13,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import org.wemeet.portal.domain.BoardGameV2;
 import org.wemeet.portal.model.gstone.*;
 import org.wemeet.portal.repository.BoardGameV2Repository;
@@ -24,9 +22,17 @@ import org.wemeet.portal.util.JsonUtil;
 @RequiredArgsConstructor
 public class GstoneServiceImpl implements GstoneService {
 
-    private final RestTemplate restTemplate;
-
     private final BoardGameV2Repository boardGameV2Repository;
+
+    @Override
+    public BoardGameV2 findGameById(int gameId) {
+        return boardGameV2Repository.findGameById(gameId);
+    }
+
+    @Override
+    public List<BoardGameV2> getGameListByIds(List<Integer> gameIds) {
+        return boardGameV2Repository.getGameListByIds(gameIds);
+    }
 
     @Override
     public List<BoardGameV2> searchGames(
@@ -62,11 +68,11 @@ public class GstoneServiceImpl implements GstoneService {
     @SneakyThrows
     @Override
     public GstoneResponse getRankList() {
-        String url = "https://www.gstonegames.com/app/v2/rank_list_get/";
+        String url = "https://www.gstonegames.com/app/v2/now_pop_list_get/";
 
-        for (int k = 1; k <= 13; k++) {
-            GstoneRequest request = new GstoneRequest();
-            request.setCategory(2);
+        for (int k = 11; k <= 20; k++) {
+            GstoneNowPopListRequest request = new GstoneNowPopListRequest();
+            request.setZoneId(1); // max is 10 then invalid
             request.setPage(k);
 
             String json = JsonUtil.convertToString(request);
@@ -93,10 +99,22 @@ public class GstoneServiceImpl implements GstoneService {
             }
 
             GstoneResponse gstoneResponse = JsonUtil.convertToObject(response.toString(), GstoneResponse.class);
+            List<Game> gameList = gstoneResponse.getData().getGameList();
+            int count = 0;
 
-            for (Game game : gstoneResponse.getData().getGameList()) {
+            for (Game game : gameList) {
+                int gameId = game.getId();
+
+                BoardGameV2 existingGame = boardGameV2Repository.findGameById(gameId);
+
+                if (existingGame != null) {
+                    log.info("skipping existing game {} - {}", gameId, game.getName());
+                    continue;
+                }
+
                 BoardGameV2 boardGameV2 = new BoardGameV2();
 
+                boardGameV2.setGameId(gameId);
                 boardGameV2.setEnglishName(game.getName());
                 boardGameV2.setChineseName(game.getName());
                 boardGameV2.setTotalTime(game.getTotalTime());
@@ -148,10 +166,15 @@ public class GstoneServiceImpl implements GstoneService {
 
                 boardGameV2.setCreatedAt(LocalDate.now());
                 boardGameV2.setUpdatedAt(LocalDate.now());
-                //boardGameV2Repository.save(boardGameV2);
+                boardGameV2Repository.save(boardGameV2);
+
+                count++;
             }
 
-            Thread.sleep(5000);
+            log.info("================================================================");
+            log.info("Games saved count is {}", count);
+
+            Thread.sleep(3000);
         }
 
         return null;

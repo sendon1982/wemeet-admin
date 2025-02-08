@@ -22,7 +22,29 @@ public class GstoneRestController implements BoardGameApi {
     private final GstoneService gstoneService;
 
     @Override
-    public ResponseEntity<List<Game>> gamesSearchGet(
+    public ResponseEntity<Game> getGameById(Integer gameId) {
+        BoardGameV2 boardGameV2 = gstoneService.findGameById(gameId);
+        Game game = toGame(boardGameV2);
+
+        return ResponseEntity.ok(game);
+    }
+
+    @Override
+    public ResponseEntity<List<Game>> getGameListByIds(List<Integer> gameIds) {
+        List<BoardGameV2> boardGameV2List = gstoneService.getGameListByIds(gameIds);
+
+        List<Game> games = new ArrayList<>();
+        for (BoardGameV2 boardGameV2 : boardGameV2List) {
+            Game game = toGame(boardGameV2);
+
+            games.add(game);
+        }
+
+        return ResponseEntity.ok(games);
+    }
+
+    @Override
+    public ResponseEntity<List<Game>> searchBoardGames(
         String englishName,
         String chineseName,
         Integer minPlayers,
@@ -34,31 +56,36 @@ public class GstoneRestController implements BoardGameApi {
 
         List<Game> games = new ArrayList<>();
         for (BoardGameV2 boardGameV2 : boardGameV2List) {
-            Game game = new Game();
-
-            game.setId(boardGameV2.getId());
-            game.setEnglishName(boardGameV2.getEnglishName());
-            game.setChineseName(boardGameV2.getChineseName());
-            game.setTotalTime(boardGameV2.getTotalTime());
-            game.setAverageTimePerPlayer(boardGameV2.getAverageTimePerPlayer());
-            game.setPrimaryLanguage(boardGameV2.getPrimaryLanguage());
-            game.setCategories(new ArrayList<>(boardGameV2.getCategories()));
-            game.setThemes(new ArrayList<>(boardGameV2.getThemes()));
-            game.setMode(boardGameV2.getMode());
-            game.setBoxUrl(boardGameV2.getBoxUrl());
-            game.setCoverUrl(boardGameV2.getCoverUrl());
-            game.setStatus(boardGameV2.getStatus());
-            game.setDifficulty(boardGameV2.getDifficulty());
-            game.setPublishYear(boardGameV2.getPublishYear());
-            game.setMinPlayers(boardGameV2.getMinPlayers());
-            game.setMaxPlayers(boardGameV2.getMaxPlayers());
-            game.setGameHotnessValue(Double.valueOf(boardGameV2.getGameHotnessValue()).intValue());
-            game.setWemeetRating(BigDecimal.valueOf(boardGameV2.getWemeetRating()));
-            game.setGstoneRating(BigDecimal.valueOf(boardGameV2.getGstoneRating()));
+            Game game = toGame(boardGameV2);
 
             games.add(game);
         }
 
         return ResponseEntity.ok(games);
+    }
+
+    private static Game toGame(BoardGameV2 boardGameV2) {
+        Game game = new Game();
+
+        game.setId(boardGameV2.getId());
+        game.setEnglishName(boardGameV2.getEnglishName());
+        game.setChineseName(boardGameV2.getChineseName());
+        game.setTotalTime(boardGameV2.getTotalTime());
+        game.setAverageTimePerPlayer(boardGameV2.getAverageTimePerPlayer());
+        game.setPrimaryLanguage(boardGameV2.getPrimaryLanguage());
+        game.setCategories(new ArrayList<>(boardGameV2.getCategories()));
+        game.setThemes(new ArrayList<>(boardGameV2.getThemes()));
+        game.setMode(boardGameV2.getMode());
+        game.setBoxUrl(boardGameV2.getBoxUrl());
+        game.setCoverUrl(boardGameV2.getCoverUrl());
+        game.setStatus(boardGameV2.getStatus());
+        game.setDifficulty(boardGameV2.getDifficulty());
+        game.setPublishYear(boardGameV2.getPublishYear());
+        game.setMinPlayers(boardGameV2.getMinPlayers());
+        game.setMaxPlayers(boardGameV2.getMaxPlayers());
+        game.setGameHotnessValue(Double.valueOf(boardGameV2.getGameHotnessValue()).intValue());
+        game.setWemeetRating(BigDecimal.valueOf(boardGameV2.getWemeetRating()));
+        game.setGstoneRating(BigDecimal.valueOf(boardGameV2.getGstoneRating()));
+        return game;
     }
 }

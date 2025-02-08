@@ -1,15 +1,18 @@
 package org.wemeet.portal.repository;
 
 import java.util.List;
-import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.stereotype.Repository;
-import org.wemeet.portal.domain.BoardGame;
 import org.wemeet.portal.domain.BoardGameV2;
 
 /**
  * Spring Data MongoDB repository for the BoardGame entity.
  */
 public interface BoardGameV2Repository {
+    BoardGameV2 findGameById(int gameId);
+
+    List<BoardGameV2> getGameListByIds(List<Integer> gameIds);
+
+    List<BoardGameV2> findByChineseName(String chineseName);
+
     List<BoardGameV2> findByEnglishNameContainingIgnoreCase(String englishName);
 
     List<BoardGameV2> findByChineseNameContainingIgnoreCase(String chineseName);
@@ -21,4 +24,6 @@ public interface BoardGameV2Repository {
     List<BoardGameV2> findByThemesContaining(String theme);
 
     List<BoardGameV2> findAll();
+
+    void save(BoardGameV2 boardGameV2);
 }

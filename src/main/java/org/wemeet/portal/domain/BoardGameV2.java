@@ -30,6 +30,9 @@ public class BoardGameV2 implements Serializable {
     private String id;
 
     @Indexed
+    private int gameId;
+
+    @Indexed
     private String englishName;
 
     @Indexed

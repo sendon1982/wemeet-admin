@@ -17,6 +17,30 @@ public class BoardGameV2RepositoryImpl implements BoardGameV2Repository {
     private final MongoTemplate mongoTemplate;
 
     @Override
+    public BoardGameV2 findGameById(int gameId) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("gameId").is(gameId));
+
+        return mongoTemplate.findOne(query, BoardGameV2.class);
+    }
+
+    @Override
+    public List<BoardGameV2> getGameListByIds(List<Integer> gameIds) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("gameId").in(gameIds));
+
+        return mongoTemplate.find(query, BoardGameV2.class);
+    }
+
+    @Override
+    public List<BoardGameV2> findByChineseName(String chineseName) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("chineseName").is(chineseName));
+
+        return mongoTemplate.find(query, BoardGameV2.class);
+    }
+
+    @Override
     public List<BoardGameV2> findByEnglishNameContainingIgnoreCase(String englishName) {
         Query query = new Query();
         query.addCriteria(Criteria.where("englishName").regex(englishName, "i"));
@@ -59,5 +83,10 @@ public class BoardGameV2RepositoryImpl implements BoardGameV2Repository {
     @Override
     public List<BoardGameV2> findAll() {
         return mongoTemplate.findAll(BoardGameV2.class);
+    }
+
+    @Override
+    public void save(BoardGameV2 boardGameV2) {
+        mongoTemplate.save(boardGameV2);
     }
 }

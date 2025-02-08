@@ -8,6 +8,49 @@ servers:
 tags:
   - name: Board Game
 paths:
+  /games/{gameId}:
+    get:
+      summary: Find game information by gameId
+      operationId: getGameById
+      tags:
+        - Board Game
+      parameters:
+        - name: gameId
+          in: path
+          description: Id of the board game
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A board game information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+
+  /games/query:
+    post:
+      summary: Find game list by its gameId
+      operationId: getGameListByIds
+      tags:
+        - Board Game
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GameQueryRequest'
+        required: true
+      responses:
+        '200':
+          description: A board game information
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Game'
+
   /games/search:
     get:
       summary: Search for board games
@@ -62,11 +105,20 @@ paths:
                   $ref: '#/components/schemas/Game'
 components:
   schemas:
+    GameQueryRequest:
+      type: object
+      properties:
+        gameIds:
+          type: array
+          items:
+            type: integer
     Game:
       type: object
       properties:
         id:
           type: string
+        gameId:
+          type: integer
         englishName:
           type: string
         chineseName:

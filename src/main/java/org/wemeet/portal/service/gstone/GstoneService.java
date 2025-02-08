@@ -1,11 +1,14 @@
 package org.wemeet.portal.service.gstone;
 
-import jakarta.annotation.PostConstruct;
 import java.util.List;
 import org.wemeet.portal.domain.BoardGameV2;
 import org.wemeet.portal.model.gstone.GstoneResponse;
 
 public interface GstoneService {
+    BoardGameV2 findGameById(int gameId);
+
+    List<BoardGameV2> getGameListByIds(List<Integer> gameIds);
+
     List<BoardGameV2> searchGames(
         String englishName,
         String chineseName,
@@ -15,6 +18,5 @@ public interface GstoneService {
         String theme
     );
 
-    @PostConstruct
     GstoneResponse getRankList();
 }
