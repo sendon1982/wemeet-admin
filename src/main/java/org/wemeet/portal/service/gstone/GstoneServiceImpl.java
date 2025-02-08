@@ -5,6 +5,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -62,7 +63,7 @@ public class GstoneServiceImpl implements GstoneService {
             return boardGameV2Repository.findByThemesContaining(theme);
         }
 
-        return boardGameV2Repository.findAll();
+        return Collections.emptyList();
     }
 
     @SneakyThrows
