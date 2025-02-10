@@ -6,6 +6,6 @@
 ./mvn dockerfile:build dockerfile:push
 
 # Deploy to GCP cloud run
-gcloud run deploy wemeet-admin --image=australia-southeast1-docker.pkg.dev/gps-root-main/wemeet-ecr/wemeet-admin:0.0.7-SNAPSHOT --region=australia-southeast1 --platform=managed --allow-unauthenticated
+gcloud run deploy wemeet-admin --image=australia-southeast1-docker.pkg.dev/gps-root-main/wemeet-ecr/wemeet-admin:0.0.12-SNAPSHOT --region=australia-southeast1 --platform=managed --allow-unauthenticated
 
 

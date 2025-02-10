@@ -73,7 +73,7 @@ public class GstoneServiceImpl implements GstoneService {
 
         for (int k = 11; k <= 20; k++) {
             GstoneNowPopListRequest request = new GstoneNowPopListRequest();
-            request.setZoneId(1); // max is 10 then invalid
+            request.setZoneId(1);
             request.setPage(k);
 
             String json = JsonUtil.convertToString(request);

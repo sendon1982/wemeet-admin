@@ -30,17 +30,18 @@ paths:
                 $ref: '#/components/schemas/Game'
 
   /games/query:
-    post:
+    get:
       summary: Find game list by its gameId
       operationId: getGameListByIds
       tags:
         - Board Game
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/GameQueryRequest'
-        required: true
+      parameters:
+        - name: gameIds
+          in: query
+          description: ID of games and separated by comma
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: A board game information

@@ -1,16 +1,20 @@
-package org.wemeet.portal.web.gstone;
+package org.wemeet.portal.web.rest.gstone;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.wemeet.portal.domain.BoardGameV2;
 import org.wemeet.portal.gen.service.gstone.BoardGameApi;
 import org.wemeet.portal.gen.service.model.Game;
+import org.wemeet.portal.gen.service.model.GameQueryRequest;
 import org.wemeet.portal.service.gstone.GstoneService;
 
 @Slf4j
@@ -30,8 +34,21 @@ public class GstoneRestController implements BoardGameApi {
     }
 
     @Override
-    public ResponseEntity<List<Game>> getGameListByIds(List<Integer> gameIds) {
-        List<BoardGameV2> boardGameV2List = gstoneService.getGameListByIds(gameIds);
+    public ResponseEntity<List<Game>> getGameListByIds(String gameIds) {
+        if (StringUtils.isBlank(gameIds)) {
+            return ResponseEntity.ok().build();
+        }
+
+        String[] idArrays = StringUtils.trim(gameIds).split(",");
+        Set<Integer> gameIdSet = new HashSet<>();
+
+        for (String strId : idArrays) {
+            if (StringUtils.isNumeric(strId)) {
+                gameIdSet.add(Integer.parseInt(strId));
+            }
+        }
+
+        List<BoardGameV2> boardGameV2List = gstoneService.getGameListByIds(new ArrayList<>(gameIdSet));
 
         List<Game> games = new ArrayList<>();
         for (BoardGameV2 boardGameV2 : boardGameV2List) {
@@ -70,6 +87,7 @@ public class GstoneRestController implements BoardGameApi {
         game.setId(boardGameV2.getId());
         game.setEnglishName(boardGameV2.getEnglishName());
         game.setChineseName(boardGameV2.getChineseName());
+        game.setGameId(boardGameV2.getGameId());
         game.setTotalTime(boardGameV2.getTotalTime());
         game.setAverageTimePerPlayer(boardGameV2.getAverageTimePerPlayer());
         game.setPrimaryLanguage(boardGameV2.getPrimaryLanguage());
