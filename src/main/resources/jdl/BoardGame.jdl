@@ -1,4 +1,4 @@
-entity BoardGameV2 {
+entity BoardGameAdminV2 {
   gameId Long
   englishName String required
   chineseName String
@@ -28,5 +28,5 @@ entity Category {
 }
 
 relationship OneToMany {
-  BoardGameV2{categories} to Category
+  BoardGameAdminV2{categories} to Category
 }
