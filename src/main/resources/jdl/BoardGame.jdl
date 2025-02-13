@@ -1,5 +1,6 @@
 entity BoardGameAdminV2 {
-  gameId Long
+  id String
+  gameId Integer
   englishName String required
   chineseName String
   totalTime Integer
