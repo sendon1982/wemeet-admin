@@ -1,9 +1,9 @@
 entity BoardGameAdminV2 {
 
   id String
-  gameId Integer
+  gameId Integer required
   englishName String required
-  chineseName String
+  chineseName String required
   totalTime Integer
   averageTimePerPlayer Integer
   primaryLanguage String
@@ -16,11 +16,7 @@ entity BoardGameAdminV2 {
   difficulty Integer
   publishYear Integer
 
-  minPlayers Integer
-  maxPlayers Integer
   gameHotnessValue Double
   wemeetRating Double
   gstoneRating Double
-  createdAt ZonedDateTime
-  updatedAt ZonedDateTime
 }
