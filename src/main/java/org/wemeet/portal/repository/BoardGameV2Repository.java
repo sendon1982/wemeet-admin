@@ -11,7 +11,7 @@ public interface BoardGameV2Repository {
 
     List<BoardGameV2> getGameListByIds(List<Integer> gameIds);
 
-    List<BoardGameV2> findByChineseName(String chineseName);
+    List<BoardGameV2> findByName(String chineseName);
 
     List<BoardGameV2> findByEnglishNameContainingIgnoreCase(String englishName);
 

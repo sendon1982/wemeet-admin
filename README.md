@@ -252,17 +252,27 @@ jhipster jdl src/main/resources/jdl/BoardGame.jdl
 
 # Build and push docker image
 
-`mvn package dockerfile:build dockerfile:push`
+`mvn package dockerfile:build dockerfile:push -DskipTests`
 
 # deploy
 
 ```
 gcloud run deploy wemeet-admin \
-      --image=australia-southeast1-docker.pkg.dev/gps-root-main/wemeet-ecr/wemeet-admin:0.0.2-SNAPSHOT \
+      --image=australia-southeast1-docker.pkg.dev/gps-root-main/wemeet-ecr/wemeet-admin:1.0.2-SNAPSHOT \
       --region=australia-southeast1 \
       --platform=managed \
       --allow-unauthenticated
 ```
+
+# Build native docker image
+
+mvn clean -Pnative native:compile -DskipTests
+
+docker build -t australia-southeast1-docker.pkg.dev/gps-root-main/wemeet-ecr/wemeet-admin:0.0.15-SNAPSHOT .
+
+docker push australia-southeast1-docker.pkg.dev/gps-root-main/wemeet-ecr/wemeet-admin:0.0.15-SNAPSHOT
+
+gcloud run deploy wemeet-admin --image=australia-southeast1-docker.pkg.dev/gps-root-main/wemeet-ecr/wemeet-admin:0.0.15-SNAPSHOT --region=australia-southeast1 --platform=managed --allow-unauthenticated
 
 # Test
 

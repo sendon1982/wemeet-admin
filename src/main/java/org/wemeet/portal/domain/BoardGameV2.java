@@ -33,10 +33,17 @@ public class BoardGameV2 implements Serializable {
     private int gameId;
 
     @Indexed
+    private int bggId;
+
+    @Indexed
     private String englishName;
 
     @Indexed
     private String chineseName;
+
+    private String englishDescription;
+
+    private String chineseDescription;
 
     private int totalTime;
 

@@ -12,3 +12,8 @@ EXPOSE 8080
 
 # Optionally, you can set the default active profile if needed:
 ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=prod"]
+
+
+#FROM ubuntu:jammy
+#COPY target/wemeet-admin /wemeet-admin
+#CMD ["/wemeet-admin --spring.profiles.active=prod"]

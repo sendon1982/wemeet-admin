@@ -59,15 +59,9 @@ paths:
       tags:
         - Board Game
       parameters:
-        - name: englishName
+        - name: name
           in: query
-          description: English name of the game
-          required: false
-          schema:
-            type: string
-        - name: chineseName
-          in: query
-          description: Chinese name of the game
+          description: English or Chinese name of the game
           required: false
           schema:
             type: string

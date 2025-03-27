@@ -61,15 +61,8 @@ public class GstoneRestController implements BoardGameApi {
     }
 
     @Override
-    public ResponseEntity<List<Game>> searchBoardGames(
-        String englishName,
-        String chineseName,
-        Integer minPlayers,
-        Integer maxPlayers,
-        String category,
-        String theme
-    ) {
-        List<BoardGameV2> boardGameV2List = gstoneService.searchGames(englishName, chineseName, minPlayers, maxPlayers, category, theme);
+    public ResponseEntity<List<Game>> searchBoardGames(String name, Integer minPlayers, Integer maxPlayers, String category, String theme) {
+        List<BoardGameV2> boardGameV2List = gstoneService.searchGames(name, minPlayers, maxPlayers, category, theme);
 
         List<Game> games = new ArrayList<>();
         for (BoardGameV2 boardGameV2 : boardGameV2List) {

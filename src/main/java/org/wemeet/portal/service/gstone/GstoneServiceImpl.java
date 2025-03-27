@@ -1,17 +1,26 @@
 package org.wemeet.portal.service.gstone;
 
+import jakarta.annotation.PostConstruct;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.wemeet.portal.domain.BoardGameV2;
 import org.wemeet.portal.model.gstone.*;
@@ -36,19 +45,9 @@ public class GstoneServiceImpl implements GstoneService {
     }
 
     @Override
-    public List<BoardGameV2> searchGames(
-        String englishName,
-        String chineseName,
-        Integer minPlayers,
-        Integer maxPlayers,
-        String category,
-        String theme
-    ) {
-        if (englishName != null) {
-            return boardGameV2Repository.findByEnglishNameContainingIgnoreCase(englishName);
-        }
-        if (chineseName != null) {
-            return boardGameV2Repository.findByChineseNameContainingIgnoreCase(chineseName);
+    public List<BoardGameV2> searchGames(String name, Integer minPlayers, Integer maxPlayers, String category, String theme) {
+        if (StringUtils.isNotBlank(name)) {
+            return boardGameV2Repository.findByName(name);
         }
 
         if (minPlayers != null && maxPlayers != null) {
@@ -179,5 +178,87 @@ public class GstoneServiceImpl implements GstoneService {
         }
 
         return null;
+    }
+
+    @SneakyThrows
+    public void getGameInfo() {
+        ExecutorService executorService = Executors.newFixedThreadPool(32);
+
+        // Get all gameIds
+        List<BoardGameV2> boardGameV2List = boardGameV2Repository.findAll();
+
+        /**
+         *         List<BoardGameV2> boardGameV2List = new ArrayList<>();
+         *         BoardGameV2 gameV2 = new BoardGameV2();
+         *         gameV2.setGameId(29568);
+         *         boardGameV2List.add(gameV2);
+         */
+
+        String url = "https://www.gstonegames.com/app/v2/game_info_get/";
+
+        for (BoardGameV2 boardGameV2 : boardGameV2List) {
+            executorService.execute(() -> {
+                final int gameId = boardGameV2.getGameId();
+
+                GameInfoRequest request = new GameInfoRequest();
+                request.setGameId(gameId);
+
+                String json = JsonUtil.convertToString(request);
+
+                URL obj = null;
+                try {
+                    obj = new URL(url);
+                } catch (MalformedURLException e) {
+                    throw new RuntimeException(e);
+                }
+                HttpURLConnection con = null;
+                try {
+                    con = (HttpURLConnection) obj.openConnection();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+                try {
+                    con.setRequestMethod("POST");
+                } catch (ProtocolException e) {
+                    throw new RuntimeException(e);
+                }
+                con.setRequestProperty("Content-Type", "application/json");
+                con.setDoOutput(true); // Important for POST
+
+                try (OutputStream os = con.getOutputStream()) {
+                    byte[] input = json.getBytes(StandardCharsets.UTF_8);
+                    os.write(input, 0, input.length);
+                } catch (Exception e) {}
+
+                String inputLine = null;
+                StringBuilder response = new StringBuilder();
+
+                try (java.io.BufferedReader in = new java.io.BufferedReader(new java.io.InputStreamReader(con.getInputStream()))) {
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                } catch (Exception e) {}
+
+                GameInfoResponse gameInfoResponse = JsonUtil.convertToObject(response.toString(), GameInfoResponse.class);
+                BoardGameV2 fetchedBoardGameV2 = boardGameV2Repository.findGameById(gameId);
+
+                if (gameInfoResponse.getData() != null && gameInfoResponse.getData().getGame_info() != null) {
+                    GameInfo gameInfo = gameInfoResponse.getData().getGame_info();
+                    if (gameInfo.id == gameId) {
+                        // same game
+                        fetchedBoardGameV2.setEnglishName(gameInfo.p_name);
+                        fetchedBoardGameV2.setChineseName(gameInfo.name);
+                        fetchedBoardGameV2.setEnglishDescription(gameInfo.p_description);
+                        fetchedBoardGameV2.setChineseDescription(gameInfo.description);
+                        fetchedBoardGameV2.setBggId(gameInfo.bgg_id);
+
+                        boardGameV2Repository.save(fetchedBoardGameV2);
+
+                        System.out.println("Updating boardgame info for gameId = " + gameId);
+                    }
+                }
+            });
+        }
     }
 }

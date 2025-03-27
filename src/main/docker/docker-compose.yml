@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  skywalking-oap:
+    image: apache/skywalking-oap-server:10.1.0-java17
+    container_name: skywalking-oap
+    restart: always
+    environment:
+      - SW_STORAGE=elasticsearch
+      - SW_STORAGE_ES_CLUSTER_NODES=elasticsearch:9200
+    ports:
+      - '12800:12800' # OAP HTTP API
+      - '11800:11800' # OAP gRPC
+    depends_on:
+      - elasticsearch
+
+  skywalking-ui:
+    image: apache/skywalking-ui:10.1.0-java17
+    container_name: skywalking-ui
+    restart: always
+    environment:
+      - SW_OAP_ADDRESS=http://skywalking-oap:12800
+    ports:
+      - '8080:8080'
+    depends_on:
+      - skywalking-oap
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.13
+    container_name: elasticsearch
+    restart: always
+    environment:
+      - discovery.type=single-node
+      - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
+    ports:
+      - '9200:9200'
+      - '9300:9300'

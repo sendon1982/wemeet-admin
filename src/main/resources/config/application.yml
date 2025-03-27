@@ -97,6 +97,20 @@ spring:
   application:
     name: wemeetadmin
 
+  # AI config
+  ai:
+    openai:
+      # 调用AI接口时表明身份的API KEY
+      api-key: sk-a51b4c64b0a94f8aae68dcc24b3ffc93
+      # 调用AI接口时的基础路径，配置的是阿里云百炼的基础路径
+      base-url: https://dashscope.aliyuncs.com/compatible-mode
+      chat:
+        options:
+          # 调用的模型，DeepSeek的话可以选择deepseek-r1或deepseek-v3
+          model: deepseek-r1
+          # 用来控制文本生成的随机性（创造力），值越小越严谨
+          temperature: 0.8
+
   devtools:
     restart:
       enabled: false

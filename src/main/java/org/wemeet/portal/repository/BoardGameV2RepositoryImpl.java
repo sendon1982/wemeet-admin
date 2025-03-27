@@ -33,9 +33,15 @@ public class BoardGameV2RepositoryImpl implements BoardGameV2Repository {
     }
 
     @Override
-    public List<BoardGameV2> findByChineseName(String chineseName) {
+    public List<BoardGameV2> findByName(String name) {
         Query query = new Query();
-        query.addCriteria(Criteria.where("chineseName").is(chineseName));
+        query.addCriteria(
+            new Criteria()
+                .orOperator(
+                    Criteria.where("englishName").regex(name, "i"), // Case-insensitive search
+                    Criteria.where("chineseName").regex(name, "i") // Case-insensitive search
+                )
+        );
 
         return mongoTemplate.find(query, BoardGameV2.class);
     }
