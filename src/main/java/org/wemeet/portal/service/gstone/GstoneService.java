@@ -5,7 +5,7 @@ import org.wemeet.portal.domain.BoardGameV2;
 import org.wemeet.portal.model.gstone.GstoneResponse;
 
 public interface GstoneService {
-    BoardGameV2 findGameById(int gameId);
+    BoardGameV2 findGameById(int gameId, Boolean includeExpansion);
 
     List<BoardGameV2> getGameListByIds(List<Integer> gameIds);
 

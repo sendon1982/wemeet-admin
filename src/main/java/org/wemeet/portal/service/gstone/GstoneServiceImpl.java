@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.wemeet.portal.domain.BoardGameV2;
+import org.wemeet.portal.domain.RelationGameIndex;
 import org.wemeet.portal.model.gstone.*;
 import org.wemeet.portal.repository.BoardGameV2Repository;
 import org.wemeet.portal.util.JsonUtil;
@@ -35,8 +36,27 @@ public class GstoneServiceImpl implements GstoneService {
     private final BoardGameV2Repository boardGameV2Repository;
 
     @Override
-    public BoardGameV2 findGameById(int gameId) {
-        return boardGameV2Repository.findGameById(gameId);
+    public BoardGameV2 findGameById(int gameId, Boolean includeExpansion) {
+        BoardGameV2 boardGame = boardGameV2Repository.findGameById(gameId);
+
+        if (boardGame.isExpansion()) {
+            // Expansion
+            log.info("GameId {} and name {} is an expansion game", gameId, boardGame.getChineseName());
+        } else {
+            if (includeExpansion != null && includeExpansion) {
+                log.info("GameId {} and name {} is an standard game and need to include expansion", gameId, boardGame.getChineseName());
+
+                Set<RelationGameIndex> gameIndices = boardGame
+                    .getRelationGameIndices()
+                    .stream()
+                    .filter(p -> p.expansion_type == 751 && p.is_expansion == 1)
+                    .collect(Collectors.toSet());
+
+                boardGame.setRelationGameIndices(new ArrayList<>(gameIndices));
+            }
+        }
+
+        return boardGame;
     }
 
     @Override
@@ -252,6 +272,15 @@ public class GstoneServiceImpl implements GstoneService {
                         fetchedBoardGameV2.setEnglishDescription(gameInfo.p_description);
                         fetchedBoardGameV2.setChineseDescription(gameInfo.description);
                         fetchedBoardGameV2.setBggId(gameInfo.bgg_id);
+
+                        fetchedBoardGameV2.setExpansion(gameInfo.isExpansion());
+                        fetchedBoardGameV2.setExpansionType(gameInfo.getExpansionType());
+
+                        if (gameInfo.getRelationInfo() != null) {
+                            RelationInfo relationInfo = gameInfo.getRelationInfo();
+                            fetchedBoardGameV2.setRelationGameIds(relationInfo.getRelationGameIds());
+                            fetchedBoardGameV2.setRelationGameIndices(relationInfo.getRelationIndices());
+                        }
 
                         boardGameV2Repository.save(fetchedBoardGameV2);
 

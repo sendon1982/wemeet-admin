@@ -21,6 +21,14 @@ paths:
           required: true
           schema:
             type: integer
+        - name: includeExpansion
+          in: query
+          description: If response will include expansion game
+          required: false
+          schema:
+            default: false
+            type: boolean
+
       responses:
         '200':
           description: A board game information
@@ -118,6 +126,10 @@ components:
           type: string
         chineseName:
           type: string
+        playedCount:
+          type: integer
+          description: how many times of this game has been played
+          default: 0
         totalTime:
           type: integer
         averageTimePerPlayer:
@@ -154,3 +166,85 @@ components:
           type: number
         gstoneRating:
           type: number
+        relationInfo:
+          type: array
+          items:
+            $ref: '#/components/schemas/RelationGame'
+
+    RelationGame:
+      type: object
+      properties:
+        is_mm:
+          type: integer
+          description: Indicates if it is mm.
+        sub_category:
+          type: string
+          description: Sub category of the game.
+        is_expansion:
+          type: integer
+          description: Indicates if it is an expansion.
+        mod_type:
+          type: integer
+          description: Modification type.
+        is_pg:
+          type: integer
+          description: Indicates if it is pg.
+        box_url:
+          type: string
+          description: URL to the game box image.
+        primary_language:
+          type: string
+          description: Primary language of the game.
+        id:
+          type: integer
+          description: Unique identifier for the game.
+        cover_url_s:
+          type: string
+          description: Small cover URL of the game.
+        publish_year:
+          type: integer
+          description: Year of publication.
+        status:
+          type: integer
+          description: Status of the game.
+        expansion_type:
+          type: integer
+          description: Type of expansion.
+        width_height:
+          type: number
+          format: double
+          description: Width and height ratio.
+        is_glight:
+          type: integer
+          description: Indicates if it is glight.
+        cover_url:
+          type: string
+          description: Cover URL of the game.
+        first_picture:
+          type: object
+          description: First picture object.
+          properties:
+            picture_url:
+              type: string
+              description: URL of the first picture.
+            picture_url_s:
+              type: string
+            width_height:
+              type: number
+              format: double
+        name:
+          type: string
+          description: Name of the game.
+        game_hotness_value:
+          type: number
+          format: double
+          description: Hotness value of the game.
+        sales_mode_id:
+          type: integer
+          description: Sales mode ID.
+        box_url_s:
+          type: string
+          description: Small box URL of the game.
+        publish_month:
+          type: integer
+          description: Month of publication.

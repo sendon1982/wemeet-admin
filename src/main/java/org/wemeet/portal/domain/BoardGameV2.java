@@ -35,6 +35,14 @@ public class BoardGameV2 implements Serializable {
     @Indexed
     private int bggId;
 
+    private List<Integer> relationGameIds;
+
+    private boolean isExpansion;
+
+    private int expansionType;
+
+    private List<RelationGameIndex> relationGameIndices;
+
     @Indexed
     private String englishName;
 

@@ -102,6 +102,9 @@ public class Game {
     @JsonProperty("mm_rating_info")
     private Map<String, Object> mmRatingInfo; // Or a specific MmRatingInfo class
 
+    @JsonProperty("relation_info")
+    private RelationInfo relationInfo;
+
     @JsonProperty("game_hotness_value")
     private double gameHotnessValue;
 
