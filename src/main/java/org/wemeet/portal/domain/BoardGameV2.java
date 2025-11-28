@@ -37,7 +37,7 @@ public class BoardGameV2 implements Serializable {
 
     private List<Integer> relationGameIds;
 
-    private boolean isExpansion;
+    private Boolean isExpansion;
 
     private int expansionType;
 

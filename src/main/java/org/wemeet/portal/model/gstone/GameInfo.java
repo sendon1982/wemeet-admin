@@ -1,6 +1,7 @@
 package org.wemeet.portal.model.gstone;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -17,6 +18,9 @@ public class GameInfo {
     public String description;
     public int bgg_id;
     public String name;
+
+    @JsonProperty("category")
+    public List<Category> categories;
 
     @JsonProperty("is_expansion")
     private boolean isExpansion;

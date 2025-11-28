@@ -18,6 +18,21 @@ public class Game {
     @JsonProperty("total_time")
     private int totalTime;
 
+    @JsonProperty("bgg_id")
+    private int bggId;
+
+    @JsonProperty("name")
+    private String chineseName;
+
+    @JsonProperty("p_name")
+    private String englishName;
+
+    @JsonProperty("description")
+    private String chineseDescription;
+
+    @JsonProperty("p_description")
+    private String englishDescription;
+
     @JsonProperty("sub_category")
     private List<Object> subCategory; // Or a specific SubCategory class
 
@@ -92,9 +107,6 @@ public class Game {
 
     @JsonProperty("player_num")
     private List<Integer> playerNum;
-
-    @JsonProperty("name")
-    private String name;
 
     @JsonProperty("difficulty")
     private int difficulty;

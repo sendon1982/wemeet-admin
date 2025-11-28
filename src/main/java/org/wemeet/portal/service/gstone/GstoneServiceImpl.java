@@ -19,8 +19,8 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.wemeet.portal.domain.BoardGameV2;
 import org.wemeet.portal.domain.RelationGameIndex;
@@ -39,12 +39,16 @@ public class GstoneServiceImpl implements GstoneService {
     public BoardGameV2 findGameById(int gameId, Boolean includeExpansion) {
         BoardGameV2 boardGame = boardGameV2Repository.findGameById(gameId);
 
-        if (boardGame.isExpansion()) {
+        if (BooleanUtils.isTrue(boardGame.getIsExpansion())) {
             // Expansion
             log.info("GameId {} and name {} is an expansion game", gameId, boardGame.getChineseName());
         } else {
             if (includeExpansion != null && includeExpansion) {
                 log.info("GameId {} and name {} is an standard game and need to include expansion", gameId, boardGame.getChineseName());
+
+                if (boardGame.getRelationGameIndices() == null) {
+                    return boardGame;
+                }
 
                 Set<RelationGameIndex> gameIndices = boardGame
                     .getRelationGameIndices()
@@ -85,14 +89,19 @@ public class GstoneServiceImpl implements GstoneService {
         return Collections.emptyList();
     }
 
-    @SneakyThrows
     @Override
+    public List<BoardGameV2> findAllGames() {
+        return boardGameV2Repository.findAll();
+    }
+
+    @SneakyThrows
+    @PostConstruct
     public GstoneResponse getRankList() {
         String url = "https://www.gstonegames.com/app/v2/now_pop_list_get/";
 
-        for (int k = 11; k <= 20; k++) {
+        for (int k = 1; k <= 1181; k++) {
             GstoneNowPopListRequest request = new GstoneNowPopListRequest();
-            request.setZoneId(1);
+            request.setZoneId(0);
             request.setPage(k);
 
             String json = JsonUtil.convertToString(request);
@@ -125,18 +134,27 @@ public class GstoneServiceImpl implements GstoneService {
             for (Game game : gameList) {
                 int gameId = game.getId();
 
+                BoardGameV2 boardGameV2 = new BoardGameV2();
                 BoardGameV2 existingGame = boardGameV2Repository.findGameById(gameId);
 
                 if (existingGame != null) {
-                    log.info("skipping existing game {} - {}", gameId, game.getName());
-                    continue;
+                    log.info("Updating existing game {} - {}", gameId, game.getChineseName());
+                    boardGameV2 = existingGame;
+                } else {
+                    log.info("Saving new game {} - {}", gameId, game.getChineseName());
                 }
 
-                BoardGameV2 boardGameV2 = new BoardGameV2();
-
                 boardGameV2.setGameId(gameId);
-                boardGameV2.setEnglishName(game.getName());
-                boardGameV2.setChineseName(game.getName());
+
+                boardGameV2.setEnglishName(game.getEnglishName());
+                boardGameV2.setChineseName(game.getChineseName());
+
+                if (StringUtils.isBlank(game.getChineseDescription())) {
+                    boardGameV2.setChineseDescription(game.getEnglishDescription());
+                } else {
+                    boardGameV2.setChineseDescription(game.getChineseDescription());
+                }
+
                 boardGameV2.setTotalTime(game.getTotalTime());
                 boardGameV2.setAverageTimePerPlayer(game.getAverageTimePerPlayer());
                 boardGameV2.setPrimaryLanguage(game.getPrimaryLanguage());
@@ -160,25 +178,23 @@ public class GstoneServiceImpl implements GstoneService {
                 List<Integer> playerNums = game.getPlayerNum();
                 boardGameV2.setPlayerNums(playerNums);
 
-                int minPlayers = 0;
-                int maxPlayers = 0;
-
-                for (int i = 0; i < playerNums.size(); i++) {
-                    if (playerNums.get(i) >= 1) {
-                        minPlayers = i + 1;
-                        break;
-                    }
-                }
-
-                for (int i = playerNums.size() - 1; i >= 0; i--) {
-                    if (playerNums.get(i) >= 1) {
-                        maxPlayers = i + 1;
-                        break;
-                    }
-                }
+                MinMaxPlayer minMaxPlayer = calcMinMaxPlayerCount(playerNums);
+                int minPlayers = minMaxPlayer.minPlayers();
+                int maxPlayers = minMaxPlayer.maxPlayers();
 
                 boardGameV2.setMinPlayers(minPlayers);
                 boardGameV2.setMaxPlayers(maxPlayers);
+
+                boardGameV2.setBggId(game.getBggId());
+
+                boardGameV2.setIsExpansion(game.getIsExpansion() == 1);
+                boardGameV2.setExpansionType(game.getExpansionType());
+
+                if (game.getRelationInfo() != null) {
+                    RelationInfo relationInfo = game.getRelationInfo();
+                    boardGameV2.setRelationGameIds(relationInfo.getRelationGameIds());
+                    boardGameV2.setRelationGameIndices(relationInfo.getRelationIndices());
+                }
 
                 boardGameV2.setGameHotnessValue(game.getGameHotnessValue());
                 boardGameV2.setWemeetRating(0);
@@ -186,6 +202,7 @@ public class GstoneServiceImpl implements GstoneService {
 
                 boardGameV2.setCreatedAt(LocalDate.now());
                 boardGameV2.setUpdatedAt(LocalDate.now());
+
                 boardGameV2Repository.save(boardGameV2);
 
                 count++;
@@ -201,18 +218,17 @@ public class GstoneServiceImpl implements GstoneService {
     }
 
     @SneakyThrows
+    // @PostConstruct
     public void getGameInfo() {
         ExecutorService executorService = Executors.newFixedThreadPool(32);
 
         // Get all gameIds
-        List<BoardGameV2> boardGameV2List = boardGameV2Repository.findAll();
+        //        List<BoardGameV2> boardGameV2List = boardGameV2Repository.findAll();
 
-        /**
-         *         List<BoardGameV2> boardGameV2List = new ArrayList<>();
-         *         BoardGameV2 gameV2 = new BoardGameV2();
-         *         gameV2.setGameId(29568);
-         *         boardGameV2List.add(gameV2);
-         */
+        List<BoardGameV2> boardGameV2List = new ArrayList<>();
+        BoardGameV2 gameV2 = new BoardGameV2();
+        gameV2.setGameId(45141);
+        boardGameV2List.add(gameV2);
 
         String url = "https://www.gstonegames.com/app/v2/game_info_get/";
 
@@ -263,31 +279,105 @@ public class GstoneServiceImpl implements GstoneService {
                 GameInfoResponse gameInfoResponse = JsonUtil.convertToObject(response.toString(), GameInfoResponse.class);
                 BoardGameV2 fetchedBoardGameV2 = boardGameV2Repository.findGameById(gameId);
 
+                if (fetchedBoardGameV2 == null) {
+                    fetchedBoardGameV2 = new BoardGameV2();
+                }
+
                 if (gameInfoResponse.getData() != null && gameInfoResponse.getData().getGame_info() != null) {
-                    GameInfo gameInfo = gameInfoResponse.getData().getGame_info();
-                    if (gameInfo.id == gameId) {
-                        // same game
-                        fetchedBoardGameV2.setEnglishName(gameInfo.p_name);
-                        fetchedBoardGameV2.setChineseName(gameInfo.name);
-                        fetchedBoardGameV2.setEnglishDescription(gameInfo.p_description);
-                        fetchedBoardGameV2.setChineseDescription(gameInfo.description);
-                        fetchedBoardGameV2.setBggId(gameInfo.bgg_id);
+                    Game game = gameInfoResponse.getData().getGame_info();
 
-                        fetchedBoardGameV2.setExpansion(gameInfo.isExpansion());
-                        fetchedBoardGameV2.setExpansionType(gameInfo.getExpansionType());
+                    fetchedBoardGameV2.setGameId(gameId);
+                    fetchedBoardGameV2.setTotalTime(game.getTotalTime());
+                    fetchedBoardGameV2.setAverageTimePerPlayer(game.getAverageTimePerPlayer());
+                    fetchedBoardGameV2.setPrimaryLanguage(game.getPrimaryLanguage());
 
-                        if (gameInfo.getRelationInfo() != null) {
-                            RelationInfo relationInfo = gameInfo.getRelationInfo();
-                            fetchedBoardGameV2.setRelationGameIds(relationInfo.getRelationGameIds());
-                            fetchedBoardGameV2.setRelationGameIndices(relationInfo.getRelationIndices());
-                        }
+                    fetchedBoardGameV2.setExpansionType(game.getExpansionType());
+                    fetchedBoardGameV2.setIsExpansion(game.getIsExpansion() == 1);
 
-                        boardGameV2Repository.save(fetchedBoardGameV2);
+                    // same game
+                    fetchedBoardGameV2.setEnglishName(game.getEnglishName());
 
-                        System.out.println("Updating boardgame info for gameId = " + gameId);
+                    if (StringUtils.isBlank(game.getChineseName())) {
+                        fetchedBoardGameV2.setChineseName(game.getEnglishName());
+                    } else {
+                        fetchedBoardGameV2.setChineseName(game.getChineseName());
                     }
+
+                    fetchedBoardGameV2.setEnglishDescription(game.getEnglishDescription());
+
+                    if (StringUtils.isBlank(game.getChineseDescription())) {
+                        fetchedBoardGameV2.setChineseDescription(game.getEnglishDescription());
+                    } else {
+                        fetchedBoardGameV2.setChineseDescription(game.getChineseDescription());
+                    }
+
+                    List<Category> categoryList = game.getCategory();
+                    Set<String> categories = categoryList.stream().map(Category::getValue).collect(Collectors.toSet());
+                    fetchedBoardGameV2.setCategories(categories);
+
+                    List<Theme> themeList = game.getTheme();
+                    Set<String> themes = themeList.stream().map(Theme::getValue).collect(Collectors.toSet());
+                    fetchedBoardGameV2.setThemes(themes);
+
+                    fetchedBoardGameV2.setMode(game.getMode().getValue());
+
+                    fetchedBoardGameV2.setBoxUrl(game.getBoxUrl());
+                    fetchedBoardGameV2.setCoverUrl(game.getCoverUrl());
+                    fetchedBoardGameV2.setStatus(game.getStatus().getValue());
+                    fetchedBoardGameV2.setDifficulty(game.getDifficulty());
+                    fetchedBoardGameV2.setPublishYear(game.getPublishYear());
+
+                    fetchedBoardGameV2.setBggId(game.getBggId());
+
+                    if (game.getRelationInfo() != null) {
+                        RelationInfo relationInfo = game.getRelationInfo();
+                        fetchedBoardGameV2.setRelationGameIds(relationInfo.getRelationGameIds());
+                        fetchedBoardGameV2.setRelationGameIndices(relationInfo.getRelationIndices());
+                    }
+
+                    List<Integer> playerNums = game.getPlayerNum();
+                    fetchedBoardGameV2.setPlayerNums(playerNums);
+
+                    MinMaxPlayer minMaxPlayer = calcMinMaxPlayerCount(playerNums);
+
+                    fetchedBoardGameV2.setMinPlayers(minMaxPlayer.minPlayers());
+                    fetchedBoardGameV2.setMaxPlayers(minMaxPlayer.maxPlayers());
+
+                    fetchedBoardGameV2.setGameHotnessValue(game.getGameHotnessValue());
+                    fetchedBoardGameV2.setWemeetRating(0);
+                    fetchedBoardGameV2.setGstoneRating(game.getGstoneRating());
+
+                    fetchedBoardGameV2.setCreatedAt(LocalDate.now());
+                    fetchedBoardGameV2.setUpdatedAt(LocalDate.now());
+
+                    boardGameV2Repository.save(fetchedBoardGameV2);
+
+                    System.out.println("Saving or Updating boardgame info for gameId = " + gameId);
                 }
             });
         }
     }
+
+    private static MinMaxPlayer calcMinMaxPlayerCount(List<Integer> playerNums) {
+        int minPlayers = 0;
+        int maxPlayers = 0;
+
+        for (int i = 0; i < playerNums.size(); i++) {
+            if (playerNums.get(i) >= 1) {
+                minPlayers = i + 1;
+                break;
+            }
+        }
+
+        for (int i = playerNums.size() - 1; i >= 0; i--) {
+            if (playerNums.get(i) >= 1) {
+                maxPlayers = i + 1;
+                break;
+            }
+        }
+
+        return new MinMaxPlayer(minPlayers, maxPlayers);
+    }
+
+    private record MinMaxPlayer(int minPlayers, int maxPlayers) {}
 }

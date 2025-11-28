@@ -9,5 +9,5 @@ import lombok.ToString;
 @ToString
 public class GameResponseData {
 
-    private GameInfo game_info;
+    private Game game_info;
 }

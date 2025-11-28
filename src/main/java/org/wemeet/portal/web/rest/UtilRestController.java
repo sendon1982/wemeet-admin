@@ -4,10 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.wemeet.portal.model.gstone.GstoneResponse;
 import org.wemeet.portal.service.gstone.GstoneService;
 
 @RestController
@@ -21,7 +19,7 @@ public class UtilRestController {
     public ResponseEntity<Void> postBoardGames() {
         System.out.println("================================================");
 
-        GstoneResponse rankList = gstoneService.getRankList();
+        //GstoneResponse rankList = gstoneService.getRankList();
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

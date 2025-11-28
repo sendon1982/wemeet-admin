@@ -268,11 +268,11 @@ gcloud run deploy wemeet-admin \
 
 mvn clean -Pnative native:compile -DskipTests
 
-docker build -t australia-southeast1-docker.pkg.dev/gps-root-main/wemeet-ecr/wemeet-admin:0.0.15-SNAPSHOT .
+docker build -t australia-southeast1-docker.pkg.dev/gps-root-main/wemeet-ecr/wemeet-admin:0.0.18-SNAPSHOT .
 
-docker push australia-southeast1-docker.pkg.dev/gps-root-main/wemeet-ecr/wemeet-admin:0.0.15-SNAPSHOT
+docker push australia-southeast1-docker.pkg.dev/gps-root-main/wemeet-ecr/wemeet-admin:0.0.18-SNAPSHOT
 
-gcloud run deploy wemeet-admin --image=australia-southeast1-docker.pkg.dev/gps-root-main/wemeet-ecr/wemeet-admin:0.0.15-SNAPSHOT --region=australia-southeast1 --platform=managed --allow-unauthenticated
+gcloud run deploy wemeet-admin --image=australia-southeast1-docker.pkg.dev/gps-root-main/wemeet-ecr/wemeet-admin:0.0.18-SNAPSHOT --region=australia-southeast1 --platform=managed --allow-unauthenticated
 
 # Test
 

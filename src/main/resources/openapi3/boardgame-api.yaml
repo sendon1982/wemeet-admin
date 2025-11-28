@@ -97,6 +97,14 @@ paths:
           required: false
           schema:
             type: string
+        - name: includeRelatedGames
+          in: query
+          description: If response should include related game info
+          required: false
+          schema:
+            type: boolean
+            default: false
+            example: false
       responses:
         '200':
           description: A list of board games matching the criteria
@@ -125,6 +133,10 @@ components:
         englishName:
           type: string
         chineseName:
+          type: string
+        englishDescription:
+          type: string
+        chineseDescription:
           type: string
         playedCount:
           type: integer
@@ -166,10 +178,72 @@ components:
           type: number
         gstoneRating:
           type: number
+        isExpansion:
+          type: boolean
+        expansionGames:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExpansionGame'
         relationInfo:
           type: array
           items:
             $ref: '#/components/schemas/RelationGame'
+
+    ExpansionGame:
+      type: object
+      properties:
+        id:
+          type: string
+        gameId:
+          type: integer
+        englishName:
+          type: string
+        chineseName:
+          type: string
+        englishDescription:
+          type: string
+        chineseDescription:
+          type: string
+        playedCount:
+          type: integer
+          description: how many times of this game has been played
+          default: 0
+        totalTime:
+          type: integer
+        averageTimePerPlayer:
+          type: integer
+        primaryLanguage:
+          type: string
+        categories:
+          type: array
+          items:
+            type: string
+        themes:
+          type: array
+          items:
+            type: string
+        mode:
+          type: string
+        boxUrl:
+          type: string
+        coverUrl:
+          type: string
+        status:
+          type: string
+        difficulty:
+          type: integer
+        publishYear:
+          type: integer
+        minPlayers:
+          type: integer
+        maxPlayers:
+          type: integer
+        gameHotnessValue:
+          type: integer
+        wemeetRating:
+          type: number
+        gstoneRating:
+          type: number
 
     RelationGame:
       type: object

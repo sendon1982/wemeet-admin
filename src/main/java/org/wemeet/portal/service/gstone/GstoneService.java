@@ -1,6 +1,8 @@
 package org.wemeet.portal.service.gstone;
 
+import jakarta.annotation.PostConstruct;
 import java.util.List;
+import lombok.SneakyThrows;
 import org.wemeet.portal.domain.BoardGameV2;
 import org.wemeet.portal.model.gstone.GstoneResponse;
 
@@ -11,5 +13,5 @@ public interface GstoneService {
 
     List<BoardGameV2> searchGames(String name, Integer minPlayers, Integer maxPlayers, String category, String theme);
 
-    GstoneResponse getRankList();
+    List<BoardGameV2> findAllGames();
 }
