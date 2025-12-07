@@ -33,6 +33,8 @@ import org.wemeet.portal.util.JsonUtil;
 @RequiredArgsConstructor
 public class GstoneServiceImpl implements GstoneService {
 
+    public static final String GAME_INFO_GET_URL = "https://www.gstonegames.com/app/v2/game_info_get/";
+
     private final BoardGameV2Repository boardGameV2Repository;
 
     @Override
@@ -95,8 +97,130 @@ public class GstoneServiceImpl implements GstoneService {
     }
 
     @SneakyThrows
-    @PostConstruct
     public GstoneResponse getRankList() {
+        String url = "https://www.gstonegames.com/app/v2/rank_list_get/";
+
+        for (int k = 1; k <= 13; k++) {
+            GstoneRankListRequest request = new GstoneRankListRequest();
+            request.setCategory(2);
+            request.setPage(k);
+
+            String json = JsonUtil.convertToString(request);
+
+            URL obj = new URL(url);
+            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+            con.setRequestMethod("POST");
+            con.setRequestProperty("Content-Type", "application/json");
+            con.setDoOutput(true); // Important for POST
+
+            try (OutputStream os = con.getOutputStream()) {
+                byte[] input = json.getBytes(StandardCharsets.UTF_8);
+                os.write(input, 0, input.length);
+            }
+
+            String inputLine = null;
+            StringBuilder response = new StringBuilder();
+
+            try (java.io.BufferedReader in = new java.io.BufferedReader(new java.io.InputStreamReader(con.getInputStream()))) {
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+            }
+
+            GstoneResponse gstoneResponse = JsonUtil.convertToObject(response.toString(), GstoneResponse.class);
+            List<Game> gameList = gstoneResponse.getData().getGameList();
+            int count = 0;
+
+            for (Game game : gameList) {
+                int gameId = game.getId();
+
+                BoardGameV2 boardGameV2 = new BoardGameV2();
+                BoardGameV2 existingGame = boardGameV2Repository.findGameById(gameId);
+
+                if (existingGame != null) {
+                    log.info("Updating existing game {} - {}", gameId, game.getChineseName());
+                    boardGameV2 = existingGame;
+                } else {
+                    log.info("Saving new game {} - {}", gameId, game.getChineseName());
+                }
+
+                GameInfoResponse gameInfo = getGameInfo(gameId);
+                game = gameInfo.getData().getGame_info();
+
+                boardGameV2.setEnglishName(game.getEnglishName());
+                boardGameV2.setChineseName(game.getChineseName());
+
+                if (StringUtils.isBlank(game.getChineseDescription())) {
+                    boardGameV2.setChineseDescription(game.getEnglishDescription());
+                } else {
+                    boardGameV2.setChineseDescription(game.getChineseDescription());
+                }
+
+                boardGameV2.setTotalTime(game.getTotalTime());
+                boardGameV2.setAverageTimePerPlayer(game.getAverageTimePerPlayer());
+                boardGameV2.setPrimaryLanguage(game.getPrimaryLanguage());
+
+                List<Category> categoryList = game.getCategory();
+                Set<String> categories = categoryList.stream().map(Category::getValue).collect(Collectors.toSet());
+                boardGameV2.setCategories(categories);
+
+                List<Theme> themeList = game.getTheme();
+                Set<String> themes = themeList.stream().map(Theme::getValue).collect(Collectors.toSet());
+                boardGameV2.setThemes(themes);
+
+                boardGameV2.setMode(game.getMode().getValue());
+
+                boardGameV2.setBoxUrl(game.getBoxUrl());
+                boardGameV2.setCoverUrl(game.getCoverUrl());
+                boardGameV2.setStatus(game.getStatus().getValue());
+                boardGameV2.setDifficulty(game.getDifficulty());
+                boardGameV2.setPublishYear(game.getPublishYear());
+
+                List<Integer> playerNums = game.getPlayerNum();
+                boardGameV2.setPlayerNums(playerNums);
+
+                MinMaxPlayer minMaxPlayer = calcMinMaxPlayerCount(playerNums);
+                int minPlayers = minMaxPlayer.minPlayers();
+                int maxPlayers = minMaxPlayer.maxPlayers();
+
+                boardGameV2.setMinPlayers(minPlayers);
+                boardGameV2.setMaxPlayers(maxPlayers);
+
+                boardGameV2.setBggId(game.getBggId());
+
+                boardGameV2.setIsExpansion(game.getIsExpansion() == 1);
+                boardGameV2.setExpansionType(game.getExpansionType());
+
+                if (game.getRelationInfo() != null) {
+                    RelationInfo relationInfo = game.getRelationInfo();
+                    boardGameV2.setRelationGameIds(relationInfo.getRelationGameIds());
+                    boardGameV2.setRelationGameIndices(relationInfo.getRelationIndices());
+                }
+
+                boardGameV2.setGameHotnessValue(game.getGameHotnessValue());
+                boardGameV2.setWemeetRating(0);
+                boardGameV2.setGstoneRating(game.getGstoneRating());
+
+                boardGameV2.setCreatedAt(LocalDate.now());
+                boardGameV2.setUpdatedAt(LocalDate.now());
+
+                boardGameV2Repository.save(boardGameV2);
+
+                count++;
+            }
+
+            log.info("================================================================");
+            log.info("Games saved count is {}", count);
+
+            Thread.sleep(3000);
+        }
+
+        return null;
+    }
+
+    @SneakyThrows
+    public GstoneResponse getPopularListGames() {
         String url = "https://www.gstonegames.com/app/v2/now_pop_list_get/";
 
         for (int k = 1; k <= 1181; k++) {
@@ -217,9 +341,55 @@ public class GstoneServiceImpl implements GstoneService {
         return null;
     }
 
+    public GameInfoResponse getGameInfo(int gameId) {
+        GameInfoRequest request = new GameInfoRequest();
+        request.setGameId(gameId);
+
+        String json = JsonUtil.convertToString(request);
+
+        URL obj = null;
+        try {
+            obj = new URL(GAME_INFO_GET_URL);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+
+        HttpURLConnection con = null;
+        try {
+            con = (HttpURLConnection) obj.openConnection();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        try {
+            con.setRequestMethod("POST");
+        } catch (ProtocolException e) {
+            throw new RuntimeException(e);
+        }
+
+        con.setRequestProperty("Content-Type", "application/json");
+        con.setDoOutput(true); // Important for POST
+
+        try (OutputStream os = con.getOutputStream()) {
+            byte[] input = json.getBytes(StandardCharsets.UTF_8);
+            os.write(input, 0, input.length);
+        } catch (Exception e) {}
+
+        String inputLine = null;
+        StringBuilder response = new StringBuilder();
+
+        try (java.io.BufferedReader in = new java.io.BufferedReader(new java.io.InputStreamReader(con.getInputStream()))) {
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+        } catch (Exception e) {}
+
+        return JsonUtil.convertToObject(response.toString(), GameInfoResponse.class);
+    }
+
     @SneakyThrows
     // @PostConstruct
-    public void getGameInfo() {
+    public void populateGameInfo() {
         ExecutorService executorService = Executors.newFixedThreadPool(32);
 
         // Get all gameIds
@@ -229,8 +399,6 @@ public class GstoneServiceImpl implements GstoneService {
         BoardGameV2 gameV2 = new BoardGameV2();
         gameV2.setGameId(45141);
         boardGameV2List.add(gameV2);
-
-        String url = "https://www.gstonegames.com/app/v2/game_info_get/";
 
         for (BoardGameV2 boardGameV2 : boardGameV2List) {
             executorService.execute(() -> {
@@ -243,7 +411,7 @@ public class GstoneServiceImpl implements GstoneService {
 
                 URL obj = null;
                 try {
-                    obj = new URL(url);
+                    obj = new URL(GAME_INFO_GET_URL);
                 } catch (MalformedURLException e) {
                     throw new RuntimeException(e);
                 }

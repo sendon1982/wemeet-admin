@@ -109,10 +109,11 @@ public class GstoneRestController implements BoardGameApi {
                     }
 
                     game.setExpansionGames(currentExpansionGames);
-                    games.add(game);
                 } else {
                     game.setExpansionGames(new ArrayList<>());
                 }
+
+                games.add(game);
             }
         }
 
@@ -132,6 +133,7 @@ public class GstoneRestController implements BoardGameApi {
         List<BoardGameV2> boardGameV2List = originalBoardGameV2List.stream().filter(boardGameV2 -> !boardGameV2.getIsExpansion()).toList();
 
         List<Game> games = new ArrayList<>();
+
         for (BoardGameV2 boardGameV2 : boardGameV2List) {
             List<RelationGameIndex> relationGameIndices = boardGameV2.getRelationGameIndices();
             Set<Integer> expansionGameIds = GameUtil.filterExpansionGameIds(relationGameIndices);
