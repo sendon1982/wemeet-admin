@@ -3,11 +3,37 @@ info:
   title: Board Game API
   description: API for searching board games
   version: 1.0.0
+
 servers:
   - url: http://localhost:8082/api/v1
+
 tags:
   - name: Board Game
+
 paths:
+  /games/{gameId}/refresh:
+    get:
+      summary: Refresh game info by gameId
+      operationId: refreshGame
+      tags:
+        - Board Game
+      security:
+        - basicAuth: [ ]
+      parameters:
+        - name: gameId
+          in: path
+          description: Id of the board game
+          required: true
+          schema:
+            type: integer
+
+      responses:
+        '200':
+          description: Successfully refreshed board game information
+          content: {}
+        '401':
+          description: Unauthorized
+
   /games/{gameId}:
     get:
       summary: Find game information by gameId
@@ -322,3 +348,8 @@ components:
         publish_month:
           type: integer
           description: Month of publication.
+
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic

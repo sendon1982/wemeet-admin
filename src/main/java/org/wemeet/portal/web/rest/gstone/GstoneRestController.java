@@ -1,7 +1,9 @@
 package org.wemeet.portal.web.rest.gstone;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -11,8 +13,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.wemeet.portal.domain.BoardGameV2;
 import org.wemeet.portal.domain.RelationGameIndex;
 import org.wemeet.portal.gen.service.gstone.BoardGameApi;
@@ -148,6 +149,54 @@ public class GstoneRestController implements BoardGameApi {
         }
 
         return ResponseEntity.ok(games);
+    }
+
+    private static final String REALM = "Board Game API Access";
+    private static final String EXPECTED_CREDENTIALS = "wemeetadmin:Welcome@1234";
+
+    @GetMapping("/util/{gameId}/refresh")
+    public String updateGame(
+        @PathVariable long gameId,
+        @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+        HttpServletResponse response
+    ) {
+        // --- 1. Check for Authorization Header ---
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Basic ")) {
+            return sendAuthenticationChallenge(response);
+        }
+
+        // --- 2. Extract and Decode Credentials ---
+        try {
+            String base64Credentials = authorizationHeader.substring("Basic ".length()).trim();
+            byte[] credDecoded = Base64.getDecoder().decode(base64Credentials);
+            String credentials = new String(credDecoded, StandardCharsets.UTF_8);
+
+            // --- 3. Validate Credentials ---
+            if (!credentials.equals(EXPECTED_CREDENTIALS)) {
+                return sendAuthenticationChallenge(response);
+            }
+        } catch (Exception e) {
+            // Handle malformed header or decoding errors
+            return sendAuthenticationChallenge(response);
+        }
+
+        gstoneService.refreshGameInfo((int) gameId);
+
+        // --- 4. Success: Credentials are Valid (200 OK) ---
+        return "Successfully refreshed board game information for ID: " + gameId;
+    }
+
+    /**
+     * Helper method to send the 401 response and WWW-Authenticate header.
+     */
+    private String sendAuthenticationChallenge(HttpServletResponse response) {
+        // Set the required header to trigger the browser prompt
+        response.setHeader("WWW-Authenticate", "Basic realm=\"" + REALM + "\"");
+
+        // Set the status code to 401 Unauthorized
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+
+        return "Unauthorized: Authentication required.";
     }
 
     private static Game toGame(BoardGameV2 boardGameV2, Boolean includeRelatedGames) {

@@ -1,6 +1,5 @@
 package org.wemeet.portal.service.gstone;
 
-import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -145,7 +144,8 @@ public class GstoneServiceImpl implements GstoneService {
                     log.info("Saving new game {} - {}", gameId, game.getChineseName());
                 }
 
-                GameInfoResponse gameInfo = getGameInfo(gameId);
+                // GameInfoResponse gameInfo = getGameInfo(gameId);
+                GameInfoResponse gameInfo = null;
                 game = gameInfo.getData().getGame_info();
 
                 boardGameV2.setEnglishName(game.getEnglishName());
@@ -388,7 +388,6 @@ public class GstoneServiceImpl implements GstoneService {
     }
 
     @SneakyThrows
-    // @PostConstruct
     public void populateGameInfo() {
         ExecutorService executorService = Executors.newFixedThreadPool(32);
 
@@ -523,6 +522,129 @@ public class GstoneServiceImpl implements GstoneService {
                     System.out.println("Saving or Updating boardgame info for gameId = " + gameId);
                 }
             });
+        }
+    }
+
+    @SneakyThrows
+    @Override
+    public void refreshGameInfo(int gameId) {
+        GameInfoRequest request = new GameInfoRequest();
+        request.setGameId(gameId);
+
+        String json = JsonUtil.convertToString(request);
+
+        URL obj = null;
+        try {
+            obj = new URL(GAME_INFO_GET_URL);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+        HttpURLConnection con = null;
+        try {
+            con = (HttpURLConnection) obj.openConnection();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        try {
+            con.setRequestMethod("POST");
+        } catch (ProtocolException e) {
+            throw new RuntimeException(e);
+        }
+        con.setRequestProperty("Content-Type", "application/json");
+        con.setDoOutput(true); // Important for POST
+
+        try (OutputStream os = con.getOutputStream()) {
+            byte[] input = json.getBytes(StandardCharsets.UTF_8);
+            os.write(input, 0, input.length);
+        } catch (Exception e) {}
+
+        String inputLine = null;
+        StringBuilder response = new StringBuilder();
+
+        try (java.io.BufferedReader in = new java.io.BufferedReader(new java.io.InputStreamReader(con.getInputStream()))) {
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+        } catch (Exception e) {}
+
+        GameInfoResponse gameInfoResponse = JsonUtil.convertToObject(response.toString(), GameInfoResponse.class);
+        BoardGameV2 fetchedBoardGameV2 = boardGameV2Repository.findGameById(gameId);
+
+        if (fetchedBoardGameV2 == null) {
+            fetchedBoardGameV2 = new BoardGameV2();
+        }
+
+        if (gameInfoResponse.getData() != null && gameInfoResponse.getData().getGame_info() != null) {
+            Game game = gameInfoResponse.getData().getGame_info();
+
+            fetchedBoardGameV2.setGameId(gameId);
+            fetchedBoardGameV2.setTotalTime(game.getTotalTime());
+            fetchedBoardGameV2.setAverageTimePerPlayer(game.getAverageTimePerPlayer());
+            fetchedBoardGameV2.setPrimaryLanguage(game.getPrimaryLanguage());
+
+            fetchedBoardGameV2.setExpansionType(game.getExpansionType());
+            fetchedBoardGameV2.setIsExpansion(game.getIsExpansion() == 1);
+
+            // same game
+            fetchedBoardGameV2.setEnglishName(game.getEnglishName());
+
+            if (StringUtils.isBlank(game.getChineseName())) {
+                fetchedBoardGameV2.setChineseName(game.getEnglishName());
+            } else {
+                fetchedBoardGameV2.setChineseName(game.getChineseName());
+            }
+
+            fetchedBoardGameV2.setEnglishDescription(game.getEnglishDescription());
+
+            if (StringUtils.isBlank(game.getChineseDescription())) {
+                fetchedBoardGameV2.setChineseDescription(game.getEnglishDescription());
+            } else {
+                fetchedBoardGameV2.setChineseDescription(game.getChineseDescription());
+            }
+
+            List<Category> categoryList = game.getCategory();
+            Set<String> categories = categoryList.stream().map(Category::getValue).collect(Collectors.toSet());
+            fetchedBoardGameV2.setCategories(categories);
+
+            List<Theme> themeList = game.getTheme();
+            Set<String> themes = themeList.stream().map(Theme::getValue).collect(Collectors.toSet());
+            fetchedBoardGameV2.setThemes(themes);
+
+            fetchedBoardGameV2.setMode(game.getMode().getValue());
+
+            fetchedBoardGameV2.setBoxUrl(game.getBoxUrl());
+            fetchedBoardGameV2.setCoverUrl(game.getCoverUrl());
+            fetchedBoardGameV2.setStatus(game.getStatus().getValue());
+            fetchedBoardGameV2.setDifficulty(game.getDifficulty());
+            fetchedBoardGameV2.setPublishYear(game.getPublishYear());
+
+            fetchedBoardGameV2.setBggId(game.getBggId());
+
+            if (game.getRelationInfo() != null) {
+                RelationInfo relationInfo = game.getRelationInfo();
+                fetchedBoardGameV2.setRelationGameIds(relationInfo.getRelationGameIds());
+                fetchedBoardGameV2.setRelationGameIndices(relationInfo.getRelationIndices());
+            }
+
+            List<Integer> playerNums = game.getPlayerNum();
+            fetchedBoardGameV2.setPlayerNums(playerNums);
+
+            MinMaxPlayer minMaxPlayer = calcMinMaxPlayerCount(playerNums);
+
+            fetchedBoardGameV2.setMinPlayers(minMaxPlayer.minPlayers());
+            fetchedBoardGameV2.setMaxPlayers(minMaxPlayer.maxPlayers());
+
+            fetchedBoardGameV2.setGameHotnessValue(game.getGameHotnessValue());
+            fetchedBoardGameV2.setWemeetRating(0);
+            fetchedBoardGameV2.setGstoneRating(game.getGstoneRating());
+
+            fetchedBoardGameV2.setCreatedAt(LocalDate.now());
+            fetchedBoardGameV2.setUpdatedAt(LocalDate.now());
+
+            boardGameV2Repository.save(fetchedBoardGameV2);
+
+            System.out.println("Refresh boardgame info for gameId = " + gameId);
         }
     }
 

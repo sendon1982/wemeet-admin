@@ -14,4 +14,7 @@ public interface GstoneService {
     List<BoardGameV2> searchGames(String name, Integer minPlayers, Integer maxPlayers, String category, String theme);
 
     List<BoardGameV2> findAllGames();
+
+    @SneakyThrows
+    void refreshGameInfo(int gameId);
 }

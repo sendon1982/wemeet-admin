@@ -250,6 +250,50 @@ jhipster jdl src/main/resources/jdl/BoardGame.jdl
 
 ### Deploy to GCP
 
+# Create Artifact Registry
+
+```
+gcloud artifacts repositories create wemeet-ecr \
+    --repository-format=docker \
+    --location=australia-southeast1 \
+    --description="wemeet ecr repo" \
+    --project=project-6e0094bd-106a-4e8e-8da
+```
+
+# Create Service Account (To fix)
+
+```
+gcloud iam service-accounts create wemeet-service-account \
+    --description="wemee -service account" \
+    --display-name="wemeet-service-account"
+```
+
+# Create Service (To fix)
+
+```
+gcloud service-directory services create SERVICE \
+    --namespace NAMESPACE \
+    --location REGION
+```
+
+# Deploy Cloud Run
+
+```
+
+```
+
+### Create GCP MySQL instance
+
+```
+gcloud sql instances create wemeet-service-db \
+  --database-version=MYSQL_8_0 \
+  --tier=db-f1-micro \
+  --region=australia-southeast1 \
+  --root-password=[password] \
+  --assign-ip \
+  --authorized-networks="0.0.0.0/0"
+```
+
 # Build and push docker image
 
 `mvn package dockerfile:build dockerfile:push -DskipTests`
